@@ -1,39 +1,62 @@
-db1:
-  image: peterbourgon/tns-db
-db2:
-  image: peterbourgon/tns-db
-  links:
-    - db1
-db3:
-  image: peterbourgon/tns-db
-  links:
-    - db1
-    - db2
+version: '2'
+services:
+  db1:
+    image: peterbourgon/tns-db
+    networks:
+        - back-tier
+  db2:
+    image: peterbourgon/tns-db
+    links:
+        - db1
+    networks:
+        - back-tier
+  db3:
+    image: peterbourgon/tns-db
+    links:
+        - db1
+        - db2
+    networks:
+        - back-tier
 
-app1:
-  image: peterbourgon/tns-app
-  links:
-    - db1
-    - db2
-    - db3
-app2:
-  image: peterbourgon/tns-app
-  links:
-    - db1
-    - db2
-    - db3
+  app1:
+    image: peterbourgon/tns-app
+    links:
+        - db1
+        - db2
+        - db3
+    networks:
+        - front-tier
+        - back-tier
+  app2:
+    image: peterbourgon/tns-app
+    links:
+        - db1
+        - db2
+        - db3
+    networks:
+        - front-tier
+        - back-tier
 
-lb1:
-  image: peterbourgon/tns-lb
-  links:
-    - app1
-    - app2
-  ports:
-    - 0.0.0.0:8001:80
-lb2:
-  image: peterbourgon/tns-lb
-  links:
-    - app1
-    - app2
-  ports:
-    - 0.0.0.0:8002:80
+  lb1:
+    image: peterbourgon/tns-lb
+    links:
+        - app1
+        - app2
+    ports:
+        - 0.0.0.0:8001:80
+    networks:
+        - front-tier
+  lb2:
+    image: peterbourgon/tns-lb
+    links:
+        - app1
+        - app2
+    ports:
+        - 0.0.0.0:8002:80
+    networks:
+        - front-tier
+networks:
+  front-tier:
+    driver: bridge
+  back-tier:
+    driver: bridge
